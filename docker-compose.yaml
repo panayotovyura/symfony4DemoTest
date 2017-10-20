@@ -1,0 +1,29 @@
+version: "3.2"
+services:
+    composer:
+      image: composer:latest
+      command: composer create-project -s beta symfony/skeleton:4.0.x demo
+      container_name: demo-composer
+      working_dir: /app
+      volumes:
+        - ./:/app
+    php-fpm:
+      image: php:7.1.10-fpm
+      command: >
+            /bin/bash -c "
+              while [ ! -d "demo/public/" ];
+              do
+                echo waiting for composer;
+                sleep 1;
+              done;
+              echo symfony 4 demo project is ready!;
+              php -S 0.0.0.0:8000 -t demo/public/
+            "
+      container_name: demo-php-fpm
+      working_dir: /app
+      volumes:
+        - ./:/app
+      ports:
+        - 8000:8000
+      depends_on:
+        - composer
